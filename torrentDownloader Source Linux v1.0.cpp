@@ -6,6 +6,7 @@
 #include <ctime>
 
 /* v1.2 Added History feature to prevent redundant donwloads */
+/* v1.3 Added Notifiication support */
 
 using namespace std;
 
@@ -80,6 +81,9 @@ void showFound(istream &katcr) {
     string command = "curl --compressed -o /media/ekansh/Stuff/Torrents/Torrent\\ Downloader/Torrent\\ Files/" + nameOfTorrent + ".torrent -A \"Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.109 Safari/537.36\" \""
      + addOfSubpage + "\"";
 
+    char commandChar[1000];
+    strncpy (commandChar, command.c_str(), 1000);
+
     bool downloadedBefore = false;
     string tempHistoryIn;
 
@@ -91,15 +95,25 @@ void showFound(istream &katcr) {
 
 
     if (!(downloadedBefore)) {
-        log << "Status: DOWNLOADING";
-        log << "Command run: " << command << endl << endl;
+        log << "Status: DOWNLOADING" << endl;
+        log << "Command run: " << command << endl;
         ofstream historyOut("/media/ekansh/Stuff/Torrents/Torrent Downloader/history.txt", std::ios::app);
         historyOut << nameOfTorrent << endl;
         historyOut.close();
-        char commandChar[1000];
-        strncpy (commandChar, command.c_str(), 1000);
+
+        string notifCommand = "notify-send \"Torrent Autodownloader: Started the download of " + nameOfTorrent + "\"";
+        string androidNotifCommand = "curl --data \"apikey=47131c97985f688d045927ab101530dc40600e3affb0c09d&application=Torrent%20Downloader&event=Started%20Torrent%20Download&description=" + nameOfTorrent + "\" https://www.notifymyandroid.com/publicapi/notify";
+
+        char notifCommandChar[1000];
+        char androidNotifCommandChar[1000];
+        strncpy(notifCommandChar, notifCommand.c_str(), 1000);
+        strncpy(androidNotifCommandChar, androidNotifCommand.c_str(), 1000);
 
         system(commandChar);
+        system(notifCommandChar);
+        system(androidNotifCommandChar);
+
+        log << "Android Notif Command sent: " << androidNotifCommand << endl << endl;
     }
 
     else {
