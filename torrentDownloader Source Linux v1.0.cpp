@@ -5,6 +5,8 @@
 #include <cstring>
 #include <ctime>
 
+/* v1.2 Added History feature to prevent redundant donwloads */
+
 using namespace std;
 
 void showFound(istream &katcr);
@@ -48,12 +50,17 @@ int main(){
                 break;
             };
         };
+
+        katcr.close();
     };
 
     log << endl << endl;
+    log.close();
+    theList.close();
 };
 
 void showFound(istream &katcr) {
+    ifstream historyIn("/media/ekansh/Stuff/Torrents/Torrent Downloader/history.txt");
     string tempLine;
     getline(katcr, tempLine);
     getline(katcr, tempLine);
@@ -73,10 +80,30 @@ void showFound(istream &katcr) {
     string command = "curl --compressed -o /media/ekansh/Stuff/Torrents/Torrent\\ Downloader/Torrent\\ Files/" + nameOfTorrent + ".torrent -A \"Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.109 Safari/537.36\" \""
      + addOfSubpage + "\"";
 
-     log << "Command run: " << command << endl << endl;
+    bool downloadedBefore = false;
+    string tempHistoryIn;
 
-    char commandChar[1000];
-    strncpy (commandChar, command.c_str(), 1000);
+    while (getline(historyIn, tempHistoryIn)) {
+        if (tempHistoryIn == nameOfTorrent) {downloadedBefore = true;};
+    };
 
-    system(commandChar);
-}
+    historyIn.close();
+
+
+    if (!(downloadedBefore)) {
+        log << "Status: DOWNLOADING";
+        log << "Command run: " << command << endl << endl;
+        ofstream historyOut("/media/ekansh/Stuff/Torrents/Torrent Downloader/history.txt", std::ios::app);
+        historyOut << nameOfTorrent << endl;
+        historyOut.close();
+        char commandChar[1000];
+        strncpy (commandChar, command.c_str(), 1000);
+
+        system(commandChar);
+    }
+
+    else {
+        log << "Status: ABORTED - DOWNLOADED BEFORE" << endl;
+        log << "Command NOT run: " << command << endl << endl;
+    };
+};
